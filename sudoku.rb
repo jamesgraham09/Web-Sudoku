@@ -23,7 +23,7 @@ end
 
 def puzzle(sudoku)
 	#This method should remove some digits to create a solvable sudoku
-	n = 40
+	n = 50
 	all_digits = (0..80).to_a
 	removal_digits = []
 	n.times do
