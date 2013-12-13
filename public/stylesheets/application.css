@@ -8,7 +8,6 @@ div.box, div.cell {
 	height: 40px;
 	font-size: 18;
 	text-align: center;
-	padding: 10px;
 }
 
 #sudoku {
