@@ -10,6 +10,10 @@ use Rack::Flash
 set :partial_template_engine, :erb
 enable :sessions
 
+configure :production do
+	require 'newrelic_rpm'
+end
+
 def random_sudoku
 	#use 9 numbers 1-9 and 72 zeros
 	#this avoids clashes as all numbers are unique
