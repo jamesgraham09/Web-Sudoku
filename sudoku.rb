@@ -1,7 +1,13 @@
 require 'sinatra'
+require 'rack-flash'
+require 'sinatra/partial'
+
 require_relative 'lib/sudoku'
 require_relative 'lib/cell'
+require_relative 'helpers/application'
 
+use Rack::Flash
+set :partial_template_engine, :erb
 enable :sessions
 
 def random_sudoku
@@ -33,7 +39,7 @@ end
 
 def box_order_to_row_order(cells)
 	#break cells into 9 rows of 9
-	boxes = cells.each.slice(9).to_a
+	boxes = cells.each_slice(9).to_a
 	#using an array of indices to understand how the data lies
 	(0..8).to_a.inject([]) {|memo, i|
 	first_box_index = (i/3) *3
@@ -51,35 +57,19 @@ def generate_new_puzzle_if_necessary
 	return if session[:current_solution]
 	sudoku = random_sudoku
 	session[:solution] = sudoku
-	session[:puzzle] = puzzle(sudoku)
+	session[:puzzle] = puzzle(sudoku.dup)
 	session[:current_solution] = session[:puzzle]
 end
 
 def prepare_to_check_solution
 	@check_solution = session[:check_solution]
+	if @check_solution
+		flash[:notice] = "Incorrect values are highlighted"
+	end
 	session[:check_solution] = nil
 end
 
-helpers do
-	def colour_class(solution_to_check, puzzle_value, current_solution_value, solution_value)
-		must_be_guessed = puzzle_value == 0
-		tried_to_guess = current_solution_value.to_i != 0
-		guessed_incorrectly = current_solution_value != solution_value
-		if solution_to_check &&
-			must_be_guessed &&
-			tried_to_guess &&
-			guessed_incorrectly
-			'incorrect'
-		elsif !must_be_guessed
-			'value_provided'
-		end
-	end
 
-	def cell_value(value)
-		value.to_i == 0 ? '' : value
-	end
-
-end
 
 
 
@@ -97,15 +87,26 @@ post '/' do
 	#so the form data params['cell'] is sent using this order
 	#However, our code expects it to be row by row
 	#so we need to transform it
-	cells = params["cell"]
+	cells = box_order_to_row_order(params["cell"])
 	session[:current_solution] = cells.map{|value| value.to_i}.join
 	session[:check_solution] = true
 	redirect to('/')
 end
 
 get '/solution' do #shows the answer to the user if needed
-	@current_solution = session[:solution]
 	@solution = session[:solution]
 	@puzzle = session[:puzzle]
+	@current_solution = session[:solution]
+	erb :index
+end
+
+post '/new' do #if you want to create a new sudoku
+	@current_solution = nil
+	@solution = nil
+	@puzzle = nil
+	session[:current_solution]= nil
+	session[:solution]=nil
+	session[:puzzle]=nil	
+	redirect to('/')
 	erb :index
 end

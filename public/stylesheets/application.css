@@ -1,10 +1,14 @@
 div.box, div.cell {
 	display: inline-block;
+	padding: 2px;
 }
 
 .cell input {
 	width: 40px;
 	height: 40px;
+	font-size: 18;
+	text-align: center;
+	padding: 10px;
 }
 
 #sudoku {
@@ -23,5 +27,6 @@ body {
 }
 
 .value_provided {
-	background-color: #DDD
+	background-color: lightgrey
 }
+
